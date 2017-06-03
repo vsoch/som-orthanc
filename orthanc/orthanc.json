@@ -6,6 +6,13 @@
                 "bar": ["BAR", "bar", 104] 
         }, 
         "RemoteAccessAllowed": true, 
+
+        "RegisteredUsers" : {
+                               "admin": "passw0rd",
+                               "orthanc": "orthanc"
+                            },
+
+        "AuthenticationEnabled" : true,
         "PostgreSQL": { 
                 "EnableIndex": true, 
                 "EnableStorage": false, 
