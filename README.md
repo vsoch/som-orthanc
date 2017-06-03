@@ -1,6 +1,6 @@
 # SOM-ORTHANC
 
-This is a Docker image configured to run [orthanc](http://book.orthanc-server.com/users/docker.html) with a simple postgres database. To use, you will need to install Docker and docker-compose. Then:
+This is a Docker image configured to run [orthanc](http://book.orthanc-server.com/users/docker.html) with a simple postgres database. I've provided complete instructions in [scripts/setup_instance.sh](scripts/setup_instance.sh) to configure a new Ubuntu 16.04 machine to run Docker and docker-compose, and in the future this will be a start up script for any general machine started with [Packer](https://packer.io). But you can also just install Docker and docker-compose locally, and give it a test! To use, you will need to install Docker and docker-compose. Then:
 
 ```
 git clone https://www.github.com/som/som-orthanc.git
@@ -11,8 +11,18 @@ You probably want to change the configuration file username and password for the
 ```
 docker-compose up -d
 ```
+You are going to see:
 
-ports 104 and 80 should connect to Orthanc, so you should be able to open [http://localhost](http://localhost) to see things.
+```
+WARNING: Image for service orthanc was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
+```
+and that's fine, it's because we are being a bit lazy in having it build for us instead of building it in advance. You could do that too:
+
+```
+docker-compose build
+```
+
+ports 104 and 80 should connect to Orthanc, so you should be able to open [http://localhost](http://localhost) to see things. Note that we are using the web server (nginx) installed on the host, which doesn't have to be the case (we could use a docker image).
 
 How do you see your images? Like this:
 
