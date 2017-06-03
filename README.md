@@ -5,6 +5,10 @@ This is a Docker image configured to run [orthanc](http://book.orthanc-server.co
 ```
 git clone https://www.github.com/som/som-orthanc.git
 cd som-orthanc
+```
+You probably want to change the configuration file username and password for the database, it's in [orthanc/orthanc.json](orthanc/orthanc.json). Then bring up the image.
+
+```
 docker-compose up -d
 ```
 
@@ -35,8 +39,51 @@ And this is how you would use (for example, storescu) to upload files:
 storescu -aec SOMORTHANC localhost 4242 *.dcm
 ```
 
-Now that I have this running, I'm going to give it a test and keep working on my dicom tools :)
+Since you probably don't have this installed on your computer, you can use the dcmtk Singularity / Docker images that I've generated. Both are provided, and can be run with [Singularity](http://singularity.lbl.gov) if in an environment without sudo, or with Docker on your local machine. Since we are working with Docker here, I'll show you how to use [the image provided on Docker Hub](https://hub.docker.com/r/vanessa/dicom/), and I've also written up a complete (nicer to look at) walkthrough for both as part of the [pydicom](https://pydicom.github.io/containers-dcmtk) organization containers docs.
 
+Here is how to see the general command usage, with `--help`:
+
+```
+docker run --volume /path/on/host/*.dcm:/data vanessa/dicom storescu --help
+```
+
+and here is how you could map a folder locally into the container with dicoms, and use storescu to send files there:
+
+```
+docker run --volume /path/on/host/*.dcm:/data vanessa/dicom storescu -aec SOMORTHANC localhost 4242 /data/*.dcm
+```
+
+Before I get this up and running in some cloudy place, I'm going to look more into the authentication and other plugins that we might want.
+
+# Storage
+The image uses an actual folder on the filesystem, which seems similar to MIRC-CTP's approach. In this instance, I found it here, along with the configuration file:
+
+```
+ls etc/orthanc
+OrthancStorage orthanc.json
+```
+
+and you can tell this from the [docker-compose.yml](docker-compose.yml), but there are other database stuffs (eg postgres) here:
+
+```
+ls /var/lib/orthanc/db
+ls /var/lib/postgresql
+```
+
+# Build
+The original build files I found by way of looking at the [base Docker Image](https://github.com/jodogne/OrthancDocker/blob/master/orthanc/Dockerfile). They are located at `/root` in the image.
+
+```
+root@b0ec09719511:/# ls /root
+build-dicomweb.sh    build-webviewer.sh  build.sh
+build-postgresql.sh  build-wsi.sh
+```
+
+And unfortunately the /root/orthanc folder (with additional scripts and resources) is removed during the [original build](https://github.com/jodogne/OrthancDocker/blob/master/orthanc/build.sh)! I cloned the original repo with mercurial, re-obtained the files (stored in [orthanc/resources](orthanc/resources) and these are added to the image. I was very happy to see that these scripts are all in Python :)
+
+
+# Things to Learn!
+Importantly, OrthanC has a [RESTful API](http://book.orthanc-server.com/users/rest.html) to interact with it, which looks like it will do most of what we need (although I need to test for myself). Backup can be done with [postgres](http://book.orthanc-server.com/users/backup.html), and I also know how to set up what Google calls [hot standby](https://cloud.google.com/community/tutorials/setting-up-postgres-hot-standby) to back that up.
 
 # Plugins
 The application seems to be focused around plugins, which I found here:
